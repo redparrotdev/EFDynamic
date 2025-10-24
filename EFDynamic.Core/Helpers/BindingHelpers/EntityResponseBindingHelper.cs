@@ -16,11 +16,11 @@ public static partial class BindingHelper
     /// bindings.</returns>
     public static Expression BuildEntityResponseBindings(
         Expression propertiesBinding
-        , Expression? relatedEntitiesBinding)
+        , Expression? relatedEntitiesBinding
+        , Expression? additionalProperties = null)
     {
         var ctor = EntityResponseInfo.Ctor;
         var propertiesPropertyInfo = EntityResponseInfo.PropertiesPropertyInfo;
-        var relatedEntitiesPropertyInfo = EntityResponseInfo.RelatedEntitiesPropertyInfo;
 
         IEnumerable<MemberBinding> bindings = [
             Expression.Bind(
@@ -30,10 +30,21 @@ public static partial class BindingHelper
 
         if (relatedEntitiesBinding is not null)
         {
+            var relatedEntitiesPropertyInfo = EntityResponseInfo.RelatedEntitiesPropertyInfo;
+
             bindings = bindings.Append(
                 Expression.Bind(
                     relatedEntitiesPropertyInfo
                     , relatedEntitiesBinding));
+        }
+
+        if (additionalProperties is not null)
+        {
+            var additionalPropertiesPropertyInfo = EntityResponseInfo.AdditionalPropertiesPropertyInfo;
+            bindings = bindings.Append(
+                Expression.Bind(
+                    additionalPropertiesPropertyInfo
+                    , additionalProperties));
         }
 
         var initExpression = Expression.MemberInit(
@@ -55,6 +66,9 @@ public static partial class BindingHelper
 
         public static readonly PropertyInfo RelatedEntitiesPropertyInfo
             = typeof(EntityResponse).GetProperty(nameof(EntityResponse.RelatedEntities))!;
+
+        public static readonly PropertyInfo AdditionalPropertiesPropertyInfo
+            = typeof(EntityResponse).GetProperty(nameof(EntityResponse.AdditionalProperties))!;
     }
 
 

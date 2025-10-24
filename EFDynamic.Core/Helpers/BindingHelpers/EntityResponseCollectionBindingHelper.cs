@@ -19,7 +19,9 @@ public static partial class BindingHelper
         , Type targetEntityType
         , string navigatioName
         , LambdaExpression selector
-        , LambdaExpression? filter = null)
+        , LambdaExpression? filter = null
+        , int? skip = null
+        , int? take = null)
     {
         Expression navigationPropertyAccess = Expression.Property(
             parentEntityParameter
@@ -37,6 +39,34 @@ public static partial class BindingHelper
                 , filter);
 
             navigationPropertyAccess = whereCall;
+        }
+
+        if (skip is int skipInt)
+        {
+            var genericSkip = EnumerableReflectionHelper
+                .GenericSkip(
+                    targetEntityType);
+
+            var skipCall = Expression.Call(
+                genericSkip
+                , navigationPropertyAccess
+                , Expression.Constant(skipInt));
+
+            navigationPropertyAccess = skipCall;
+        }
+
+        if (take is int takeInt)
+        {
+            var genericTake = EnumerableReflectionHelper
+                .GenericTake(
+                    targetEntityType);
+
+            var takeCall = Expression.Call(
+                genericTake
+                , navigationPropertyAccess
+                , Expression.Constant(takeInt));
+
+            navigationPropertyAccess = takeCall;
         }
 
         var genericSelect = EnumerableReflectionHelper

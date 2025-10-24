@@ -11,6 +11,11 @@ public class EntityRequest
     public IReadOnlyList<string> Properties { get; init; } = [];
 
     public IReadOnlyCollection<RelatedEntityRequest> RelatedEntities { get; init; } = [];
+
+    public IReadOnlyCollection<Func<Expression, (string, Expression)>> AdditionalProperties { get; init; } = [];
+
+    public int? Skip { get; init; }
+    public int? Take { get; init; }
 }
 
 public class RelatedEntityRequest
@@ -22,4 +27,9 @@ public class RelatedEntityRequest
     public IReadOnlyList<string> Properties { get; init; } = [];
 
     public IReadOnlyCollection<RelatedEntityRequest> RelatedEntities { get; init; } = [];
+
+    public IReadOnlyCollection<Func<Expression, (string, Expression)>> AdditionalProperties { get; init; } = [];
+
+    public int? Skip { get; init; }
+    public int? Take { get; init; }
 }

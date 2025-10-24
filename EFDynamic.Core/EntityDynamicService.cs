@@ -28,6 +28,10 @@ public sealed class EntityDynamicService
 
         var typedQueryable = queryable.Provider.CreateQuery<EntityResponse>(queryable.Expression);
 
+        typedQueryable = typedQueryable
+            .IfThen(request.Skip is not null, q => q.Skip(request.Skip!.Value))
+            .IfThen(request.Take is not null, q => q.Take(request.Take!.Value));
+
         var result = await typedQueryable
             .AsNoTracking()
             .ToArrayAsync();
@@ -58,9 +62,18 @@ public sealed class EntityDynamicService
                 , rootEntityChildsBindings)
             : null;
 
+        Expression? additionalPropertiesExpression = null;
+        if (request.AdditionalProperties.Count > 0)
+        {
+            additionalPropertiesExpression = BuildAdditionalPropertiesExpression(
+                rootEntityParameter
+                , request.AdditionalProperties);
+        }
+
         var rootEntityResponseExpression = BindingHelper.BuildEntityResponseBindings(
             rootEntityPropertiesExpression
-            , rootRelatedEntitiesBinding);
+            , rootRelatedEntitiesBinding
+            , additionalPropertiesExpression);
 
         var lambda = Expression.Lambda(
             rootEntityResponseExpression
@@ -107,9 +120,18 @@ public sealed class EntityDynamicService
                     , childEntityChildsBindings)
                 : null;
 
+            Expression? childAdditionalProperties = null;
+            if (req.AdditionalProperties.Count > 0)
+            {
+                childAdditionalProperties = BuildAdditionalPropertiesExpression(
+                    childEntityParameter
+                    , req.AdditionalProperties);
+            }
+
             var childEntityResponseExpression = BindingHelper.BuildEntityResponseBindings(
                 childEntityPropertiesExpression
-                , childRelatedEntitiesBinding);
+                , childRelatedEntitiesBinding
+                , childAdditionalProperties);
 
             var childEntityExpression = isCollection
                 ? BindingHelper.BuildRelatedEntityResponseCollectionBinding(
@@ -119,7 +141,9 @@ public sealed class EntityDynamicService
                     , Expression.Lambda(
                         childEntityResponseExpression
                         , (ParameterExpression)childEntityParameter)
-                    , req.WhereExpression)
+                    , req.WhereExpression
+                    , req.Skip
+                    , req.Take)
                 : childEntityResponseExpression;
 
             var childEntityRelatedEntityResponseExpression = BindingHelper.BuildRelatedEntityResponseBinding(
@@ -135,6 +159,30 @@ public sealed class EntityDynamicService
     {
         var paramName = $"p_{_nextParameterIndex++}";
         return paramName;
+    }
+
+    private static Expression BuildAdditionalPropertiesExpression(
+        Expression entityParameter
+        , IEnumerable<Func<Expression, (string, Expression)>> factories)
+    {
+        var initializers = factories
+            .Select(factory =>
+            {
+                var (name, valueExpression) = factory(entityParameter);
+                
+                var entityPropertyModelBinding = BindingHelper
+                    .BuildEntityPropertyModelBinding(
+                        name
+                        , valueExpression);
+
+                return entityPropertyModelBinding;
+            });
+
+        var arrayInit = Expression.NewArrayInit(
+            typeof(EntityPropertyModel)
+            , initializers);
+
+        return arrayInit;
     }
 }
 
@@ -155,5 +203,18 @@ file static class LocalExtensions
         var projected = selectMethod.Invoke(null, [filtered!, selectExpression]);
 
         return (IQueryable)projected!;
+    }
+
+    public static IQueryable<T> IfThen<T>(
+        this IQueryable<T> source
+        , bool condition
+        , Func<IQueryable<T>, IQueryable<T>> mapFunction)
+    {
+        if (condition)
+        {
+            return mapFunction.Invoke(source);
+        }
+
+        return source;
     }
 }

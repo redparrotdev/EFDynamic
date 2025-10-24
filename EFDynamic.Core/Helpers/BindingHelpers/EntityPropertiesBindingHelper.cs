@@ -55,6 +55,35 @@ public static partial class BindingHelper
         return arrayInit;
     }
 
+    /// <summary>
+    /// Builds an expression that initializes an <see cref="EntityPropertyModel"/> with the specified name and value.
+    /// </summary>
+    /// <param name="name">The name of the entity property to be set.</param>
+    /// <param name="valueExpression">An expression representing the value to be assigned to the entity property.</param>
+    /// <returns>An <see cref="Expression"/> that represents the initialization of an entity property model with the specified
+    /// name and value.</returns>
+    public static Expression BuildEntityPropertyModelBinding(
+        string name
+        , Expression valueExpression)
+    {
+        var ctor = EntityPropertyModelInfo.Ctor;
+        var namePropertyInfo = EntityPropertyModelInfo.NamePropertyInfo;
+        var valuePropertyInfo = EntityPropertyModelInfo.ValuePropertyInfo;
+
+        var binding = Expression.MemberInit(
+            Expression.New(ctor)
+            , Expression.Bind(
+                namePropertyInfo
+                , Expression.Constant(name))
+            , Expression.Bind(
+                valuePropertyInfo
+                , Expression.Convert(
+                    valueExpression
+                    , typeof(object))));
+
+        return binding;
+    }
+
     private static class EntityPropertyModelInfo
     {
         public static readonly Type Type = typeof(EntityPropertyModel);

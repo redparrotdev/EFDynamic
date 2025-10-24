@@ -4,6 +4,8 @@ public class EntityResponse
 {
     public EntityPropertyModel[] Properties { get; set; } = [];
     public RelatedEntityResponse[] RelatedEntities { get; set; } = [];
+
+    public EntityPropertyModel[] AdditionalProperties { get; set; } = [];
 }
 
 public class RelatedEntityResponse

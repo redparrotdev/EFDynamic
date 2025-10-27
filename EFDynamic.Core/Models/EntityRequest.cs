@@ -6,13 +6,13 @@ public class EntityRequest
 {
     public required string EntityName { get; init; }
 
-    public required LambdaExpression WhereExpression { get; init; }
-
     public IReadOnlyList<string> Properties { get; init; } = [];
 
     public IReadOnlyCollection<RelatedEntityRequest> RelatedEntities { get; init; } = [];
 
     public IReadOnlyCollection<Func<Expression, (string, Expression)>> AdditionalProperties { get; init; } = [];
+
+    public LambdaExpression? WhereExpression { get; init; }
 
     public int? Skip { get; init; }
     public int? Take { get; init; }

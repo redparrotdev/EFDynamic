@@ -23,8 +23,8 @@ public sealed class EntityDynamicService
         
         var queryable = Context.DynamicQuery(
             request.EntityName
-            , request.WhereExpression
             , selectExpression
+            , request.WhereExpression
             , request.OrderBy
             , request.Descending);
 
@@ -165,7 +165,7 @@ public sealed class EntityDynamicService
         return paramName;
     }
 
-    private static Expression BuildAdditionalPropertiesExpression(
+    private static NewArrayExpression BuildAdditionalPropertiesExpression(
         Expression entityParameter
         , IEnumerable<Func<Expression, (string, Expression)>> factories)
     {
@@ -194,18 +194,19 @@ file static class LocalExtensions
 {
     public static IQueryable DynamicQuery(this DbContext context
         , string entityName
-        , LambdaExpression whereExpression
         , LambdaExpression selectExpression
+        , LambdaExpression? whereExpression = null
         , LambdaExpression? orderByExpression = null
         , bool descending = false)
     {
         var entityType = context.GetEntityTypeByName(entityName);
-        var entityQueryable = context.EntityQueryable(entityType);
+        var entityQueryable = (object)context.EntityQueryable(entityType);
 
-        var whereMethod = QueryableReflectionHelper.GenericWhere(entityType);
-        var selectMethod = QueryableReflectionHelper.GenericSelect(entityType, typeof(EntityResponse));
-
-        var filtered = whereMethod.Invoke(null, [entityQueryable, whereExpression]);
+        if (whereExpression is not null)
+        {
+            var whereMethod = QueryableReflectionHelper.GenericWhere(entityType);
+            entityQueryable = whereMethod.Invoke(null, [entityQueryable, whereExpression]);
+        }
 
         if (orderByExpression is not null)
         {
@@ -213,10 +214,11 @@ file static class LocalExtensions
                 entityType
                 , descending);
 
-            filtered = orderByMethod.Invoke(null, [filtered!, orderByExpression]);
+            entityQueryable = orderByMethod.Invoke(null, [entityQueryable!, orderByExpression]);
         }
 
-        var projected = selectMethod.Invoke(null, [filtered!, selectExpression]);
+        var selectMethod = QueryableReflectionHelper.GenericSelect(entityType, typeof(EntityResponse));
+        var projected = selectMethod.Invoke(null, [entityQueryable!, selectExpression]);
 
         return (IQueryable)projected!;
     }

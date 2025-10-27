@@ -16,6 +16,9 @@ public class EntityRequest
 
     public int? Skip { get; init; }
     public int? Take { get; init; }
+
+    public LambdaExpression? OrderBy { get; init; }
+    public bool Descending { get; init; }
 }
 
 public class RelatedEntityRequest
@@ -32,4 +35,7 @@ public class RelatedEntityRequest
 
     public int? Skip { get; init; }
     public int? Take { get; init; }
+
+    public LambdaExpression? OrderBy { get; init; }
+    public bool Descending { get; init; }
 }

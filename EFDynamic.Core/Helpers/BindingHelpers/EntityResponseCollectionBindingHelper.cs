@@ -21,7 +21,9 @@ public static partial class BindingHelper
         , LambdaExpression selector
         , LambdaExpression? filter = null
         , int? skip = null
-        , int? take = null)
+        , int? take = null
+        , LambdaExpression? orderBy = null
+        , bool descending = false)
     {
         Expression navigationPropertyAccess = Expression.Property(
             parentEntityParameter
@@ -39,6 +41,21 @@ public static partial class BindingHelper
                 , filter);
 
             navigationPropertyAccess = whereCall;
+        }
+
+        if (orderBy is not null)
+        {
+            var genericOrderBy = EnumerableReflectionHelper
+                .GenericOrderBy(
+                    targetEntityType
+                    , descending);
+
+            var orderByCall = Expression.Call(
+                genericOrderBy
+                , navigationPropertyAccess
+                , orderBy);
+
+            navigationPropertyAccess = orderByCall;
         }
 
         if (skip is int skipInt)

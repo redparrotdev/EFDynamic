@@ -24,7 +24,9 @@ public sealed class EntityDynamicService
         var queryable = Context.DynamicQuery(
             request.EntityName
             , request.WhereExpression
-            , selectExpression);
+            , selectExpression
+            , request.OrderBy
+            , request.Descending);
 
         var typedQueryable = queryable.Provider.CreateQuery<EntityResponse>(queryable.Expression);
 
@@ -143,7 +145,9 @@ public sealed class EntityDynamicService
                         , (ParameterExpression)childEntityParameter)
                     , req.WhereExpression
                     , req.Skip
-                    , req.Take)
+                    , req.Take
+                    , req.OrderBy
+                    , req.Descending)
                 : childEntityResponseExpression;
 
             var childEntityRelatedEntityResponseExpression = BindingHelper.BuildRelatedEntityResponseBinding(
@@ -191,7 +195,9 @@ file static class LocalExtensions
     public static IQueryable DynamicQuery(this DbContext context
         , string entityName
         , LambdaExpression whereExpression
-        , LambdaExpression selectExpression)
+        , LambdaExpression selectExpression
+        , LambdaExpression? orderByExpression = null
+        , bool descending = false)
     {
         var entityType = context.GetEntityTypeByName(entityName);
         var entityQueryable = context.EntityQueryable(entityType);
@@ -200,6 +206,16 @@ file static class LocalExtensions
         var selectMethod = QueryableReflectionHelper.GenericSelect(entityType, typeof(EntityResponse));
 
         var filtered = whereMethod.Invoke(null, [entityQueryable, whereExpression]);
+
+        if (orderByExpression is not null)
+        {
+            var orderByMethod = QueryableReflectionHelper.GenericOrderBy(
+                entityType
+                , descending);
+
+            filtered = orderByMethod.Invoke(null, [filtered!, orderByExpression]);
+        }
+
         var projected = selectMethod.Invoke(null, [filtered!, selectExpression]);
 
         return (IQueryable)projected!;

@@ -5,6 +5,25 @@ using System.Reflection;
 namespace EFDynamic.Core.Helpers;
 public static partial class BindingHelper
 {
+    /// <summary>
+    /// Builds an <see cref="Expression"/> that initializes an instance of the <see cref="EntityResponse"/> type with the
+    /// specified property initialization expressions.
+    /// </summary>
+    /// <remarks>This method constructs a <see cref="MemberInitExpression"/> that initializes an
+    /// <see cref="EntityResponse"/> object. The resulting expression can be used in LINQ expression trees to dynamically
+    /// create instances of the type.</remarks>
+    /// <param name="propertiesInitExpression">
+    /// An <see cref="Expression"/> representing the initialization of the <see cref="EntityResponse.Properties"/>.
+    /// This parameter is required and cannot be <c>null</c>.
+    /// </param>
+    /// <param name="relatedEntitiesInitExpression">
+    /// An optional <see cref="Expression"/> representing the initialization of the <see cref="EntityResponse.RelatedEntities"/> property.
+    /// </param>
+    /// <param name="additionalPropertiesInitExpression">
+    /// An optional <see cref="Expression"/> representing the initialization of the <see cref="EntityResponse.AdditionalProperties"/> property.
+    /// </param>
+    /// <returns>An <see cref="Expression"/> that represents the initialization of an <see cref="EntityResponse"/> instance with the
+    /// specified property values.</returns>
     public static Expression BuildEntityResponseInstanceInitExpression(
         Expression propertiesInitExpression
         , Expression? relatedEntitiesInitExpression

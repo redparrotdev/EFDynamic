@@ -6,6 +6,20 @@ namespace EFDynamic.Core.Helpers;
 
 public static partial class BindingHelper
 {
+    /// <summary>
+    /// Builds an expression that initializes an array of entity property models based on the specified entity type,
+    /// entity parameter, and property names.
+    /// </summary>
+    /// <remarks>This method generates an expression that creates an array of objects, where each object
+    /// represents a property of the entity. The resulting expression can be compiled and executed to retrieve the
+    /// property values dynamically at runtime. Properties that do not exist on the specified entity type are
+    /// ignored.</remarks>
+    /// <param name="entityType">The type of the entity whose properties are being processed.</param>
+    /// <param name="entityParameter">An expression representing the entity instance from which property values will be retrieved.</param>
+    /// <param name="properties">A collection of property names to include in the resulting array. Only properties that exist on the specified
+    /// <paramref name="entityType"/> will be included.</param>
+    /// <returns>An <see cref="Expression"/> representing the initialization of an array of entity property models. Each model
+    /// contains the property name and its corresponding value from the entity instance.</returns>
     public static Expression BuildEntityPropertiesArrayInitExpression(Type entityType
         , Expression entityParameter
         , IEnumerable<string> properties)

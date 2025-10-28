@@ -17,10 +17,12 @@ public static partial class ExpressionsHelper
         var rootEntityType = context.GetEntityTypeByName(request.EntityName);
         var rootEntityParameter = parametersFactory.CreateParameter(rootEntityType);
 
+        var rootEntityPropertiesMapping = context.GetEntityTypePropertiesMapping(rootEntityType);
         var rootEntityPropertiesExpression = BindingHelper.BuildEntityPropertiesArrayInitExpression(
             rootEntityType
             , rootEntityParameter
-            , request.Properties);
+            , request.Properties
+            , rootEntityPropertiesMapping);
 
         var rootEntityChildsBindings = request
             .RelatedEntities
@@ -72,10 +74,12 @@ public static partial class ExpressionsHelper
                     , req.NavigationName);
             }
 
+            var childEntityPropertiesMapping = context.GetEntityTypePropertiesMapping(entityType);
             var childEntityPropertiesExpression = BindingHelper.BuildEntityPropertiesArrayInitExpression(
                 entityType
                 , childEntityParameter
-                , req.Properties);
+                , req.Properties
+                , childEntityPropertiesMapping);
 
             var childEntityChildsBindings = req
                 .RelatedEntities

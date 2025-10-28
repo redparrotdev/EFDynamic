@@ -18,11 +18,13 @@ public static partial class BindingHelper
     /// <param name="entityParameter">An expression representing the entity instance from which property values will be retrieved.</param>
     /// <param name="properties">A collection of property names to include in the resulting array. Only properties that exist on the specified
     /// <paramref name="entityType"/> will be included.</param>
+    /// <param name="propertyInfoLookup">An optional dictionary mapping property names to their corresponding <see cref="PropertyInfo"/> objects.</param>
     /// <returns>An <see cref="Expression"/> representing the initialization of an array of entity property models. Each model
     /// contains the property name and its corresponding value from the entity instance.</returns>
     public static Expression BuildEntityPropertiesArrayInitExpression(Type entityType
         , Expression entityParameter
-        , IEnumerable<string> properties)
+        , IEnumerable<string> properties
+        , Dictionary<string, PropertyInfo>? propertyInfoLookup = null)
     {
         var ctor = EntityPropertyModelInfo.Ctor;
         var namePropertyInfo = EntityPropertyModelInfo.NamePropertyInfo;
@@ -31,11 +33,7 @@ public static partial class BindingHelper
         var bindings = properties
             .Select(propertyName =>
             {
-                // TODO: use context model to fetch data faster
-                var propertyInfo = entityType
-                    .GetProperty(
-                        propertyName
-                        , BindingFlags.Public | BindingFlags.Instance);
+                var propertyInfo = GetPropertyInfo(propertyName);
                 if (propertyInfo is null) return null!;
 
                 return Expression.MemberInit(
@@ -57,6 +55,22 @@ public static partial class BindingHelper
             , bindings);
 
         return arrayInit;
+
+        // Closure
+        PropertyInfo? GetPropertyInfo(string propertyName)
+        {
+            if (propertyInfoLookup?.TryGetValue(propertyName, out PropertyInfo? propertyInfo) == true)
+            {
+                return propertyInfo;
+            }
+
+            propertyInfo = entityType
+                .GetProperty(
+                    propertyName
+                    , BindingFlags.Public | BindingFlags.Instance);
+
+            return propertyInfo;
+        }
     }
 
     public static Expression BuildEntityPropertyInstanceInitExpression(

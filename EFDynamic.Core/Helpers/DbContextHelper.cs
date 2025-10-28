@@ -5,16 +5,25 @@ namespace EFDynamic.Core.Helpers;
 
 public static class DbContextHelper
 {
+    private static readonly Dictionary<Type, MethodInfo> _setMethodInfoByTypeCache = [];
+
     private static readonly MethodInfo DbContextSetMethodInfo
         = typeof(DbContext)
             .GetMethod(nameof(DbContext.Set), Type.EmptyTypes)!;
 
     public static MethodInfo GenericSetMethod(Type entityType)
     {
-        var genericSetMethod = DbContextSetMethodInfo
+        if (_setMethodInfoByTypeCache.TryGetValue(entityType, out var genericSetMethod))
+        {
+            return genericSetMethod;
+        }
+
+        genericSetMethod = DbContextSetMethodInfo
             .MakeGenericMethod(entityType)
             ?? throw new InvalidOperationException(
                 $"Could not make generic method for DbContext.Set<> of type '{entityType.Name}'");
+
+        _setMethodInfoByTypeCache[entityType] = genericSetMethod;
 
         return genericSetMethod;
     }

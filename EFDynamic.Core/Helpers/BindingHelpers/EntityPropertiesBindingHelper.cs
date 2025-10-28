@@ -6,17 +6,7 @@ namespace EFDynamic.Core.Helpers;
 
 public static partial class BindingHelper
 {
-    /// <summary>
-    /// Builds an expression that initializes an array of entity property bindings.
-    /// </summary>
-    /// <remarks>This method creates an expression that constructs an array of objects, each representing a
-    /// binding between a property name and its value for a given entity type. Only properties that exist on the
-    /// specified entity type are included in the resulting expression.</remarks>
-    /// <param name="entityType">The type of the entity whose properties are to be bound.</param>
-    /// <param name="entityParameter">The parameter expression representing the entity instance.</param>
-    /// <param name="properties">A collection of property names to be included in the bindings.</param>
-    /// <returns>An expression representing an array of initialized entity property bindings.</returns>
-    public static Expression BuildEntityPropertiesBindings(Type entityType
+    public static Expression BuildEntityPropertiesArrayInitExpression(Type entityType
         , Expression entityParameter
         , IEnumerable<string> properties)
     {
@@ -55,14 +45,7 @@ public static partial class BindingHelper
         return arrayInit;
     }
 
-    /// <summary>
-    /// Builds an expression that initializes an <see cref="EntityPropertyModel"/> with the specified name and value.
-    /// </summary>
-    /// <param name="name">The name of the entity property to be set.</param>
-    /// <param name="valueExpression">An expression representing the value to be assigned to the entity property.</param>
-    /// <returns>An <see cref="Expression"/> that represents the initialization of an entity property model with the specified
-    /// name and value.</returns>
-    public static Expression BuildEntityPropertyModelBinding(
+    public static Expression BuildEntityPropertyInstanceInitExpression(
         string name
         , Expression valueExpression)
     {
@@ -84,7 +67,7 @@ public static partial class BindingHelper
         return binding;
     }
 
-    private static class EntityPropertyModelInfo
+    public static class EntityPropertyModelInfo
     {
         public static readonly Type Type = typeof(EntityPropertyModel);
 

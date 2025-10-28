@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 
 namespace EFDynamic.Core.Helpers;
 
@@ -32,6 +33,14 @@ public static class QueryableReflectionHelper
                 m.Name == nameof(Queryable.Select)
                 && m.GetParameters().Length == 2);
 
+    public static readonly MethodInfo AsSplitQueryMethodInfo
+        = typeof(RelationalQueryableExtensions)
+            .GetMethods(BindingFlags.Public | BindingFlags.Static)
+            .First(m =>
+                m.Name == nameof(RelationalQueryableExtensions.AsSingleQuery)
+                && m.GetParameters().Length == 1);
+
+
     private static readonly Type ObjectType = typeof(object);
 
     public static MethodInfo GenericWhere(Type entityType)
@@ -49,5 +58,10 @@ public static class QueryableReflectionHelper
     public static MethodInfo GenericSelect(Type sourceType, Type resultType)
     {
         return SelectMethodInfo.MakeGenericMethod(sourceType, resultType);
+    }
+
+    public static MethodInfo GenericAsSplitQuery(Type entityType)
+    {
+        return AsSplitQueryMethodInfo.MakeGenericMethod(entityType);
     }
 }

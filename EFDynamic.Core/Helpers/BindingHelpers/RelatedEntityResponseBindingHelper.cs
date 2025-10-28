@@ -5,17 +5,7 @@ using System.Reflection;
 namespace EFDynamic.Core.Helpers;
 public static partial class BindingHelper
 {
-    /// <summary>
-    /// Builds an expression that initializes a <see cref="RelatedEntityResponse"/> object with the specified navigation name,
-    /// collection status, and related entity expression.
-    /// </summary>
-    /// <param name="navigationName">The name of the navigation property associated with the related entity.</param>
-    /// <param name="isCollection">A value indicating whether the related entity is a collection. <see langword="true"/> if it is a collection;
-    /// otherwise, <see langword="false"/>.</param>
-    /// <param name="relatedEntityExpression">An expression representing the related entity or entities to be bound to the response.</param>
-    /// <returns>An <see cref="Expression"/> that represents the initialization of a <see cref="RelatedEntityResponse"/> object with the
-    /// specified parameters.</returns>
-    public static Expression BuildRelatedEntityResponseBinding(
+    public static Expression BuildRelatedEntityResponseInstanceInitExpression(
         string navigationName
         , bool isCollection
         , Expression relatedEntityExpression)
@@ -49,7 +39,7 @@ public static partial class BindingHelper
         return initExpression;
     }
 
-    private static class RelatedEntityResponseInfo
+    public static class RelatedEntityResponseInfo
     {
         public static readonly Type Type = typeof(RelatedEntityResponse);
 

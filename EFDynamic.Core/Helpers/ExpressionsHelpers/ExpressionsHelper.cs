@@ -2,7 +2,7 @@
 
 namespace EFDynamic.Core.Helpers;
 
-public static class ExpressionsHelper
+public static partial class ExpressionsHelper
 {
     public static LambdaExpression WherePropertyEquals(Type entityType
         , string propertyName

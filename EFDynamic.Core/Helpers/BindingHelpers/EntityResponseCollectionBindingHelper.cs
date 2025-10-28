@@ -4,17 +4,7 @@ using System.Linq.Expressions;
 namespace EFDynamic.Core.Helpers;
 public static partial class BindingHelper
 {
-    /// <summary>
-    /// Builds an expression that projects a collection of related entities into an array of <see
-    /// cref="EntityResponse"/> objects.
-    /// </summary>
-    /// <param name="parentEntityParameter">The parameter expression representing the parent entity from which the navigation property is accessed.</param>
-    /// <param name="targetEntityType">The type of the target entity in the navigation property collection.</param>
-    /// <param name="navigatioName">The name of the navigation property on the parent entity that represents the collection of related entities.</param>
-    /// <param name="selector">A lambda expression used to transform each entity in the collection to an <see cref="EntityResponse"/>.</param>
-    /// <returns>An expression that, when executed, returns an array of <see cref="EntityResponse"/> objects representing the
-    /// related entities.</returns>
-    public static Expression BuildRelatedEntityResponseCollectionBinding(
+    public static Expression BuildRelatedEntityResponseCollectionExpression(
         Expression parentEntityParameter
         , Type targetEntityType
         , string navigatioName
